@@ -1,0 +1,84 @@
+﻿name: Pull request workflow
+
+on: pull_request
+
+env:
+  REGISTRY: sevensevenbit.azurecr.io
+  OPERATOR_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-api
+  WORKER_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-worker
+  TRANSACTION_STREAM_SERVICE_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-transaction-stream-service
+  TRANSACTION_ID_SERVICE_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-transaction-id-service
+  TRANSACTION_SAGA_SERVICE_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-saga-service
+  OPERATOR_MIGRATIONS_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-migrations
+  BLOCKCHAIN_MIGRATIONS_IMAGE_NAME: sevensevenbit/sevensevenbit-operator-blockchain-migrations
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    env:
+      MAJOR: 1
+      MINOR: 0
+    steps:
+      - id: version
+        name: Create Release
+        run: echo "value=${{ env.MAJOR }}.${{ env.MINOR }}.$(date +%y%j | tr -d '\n').$(date +%H%M | tr -d '\n')-beta" >> $GITHUB_OUTPUT
+    outputs:
+      release_version: ${{ steps.version.outputs.value }}
+  
+  # Ideally this job would be split in 3, but because the github runners don't share context between jobs 
+  # and using shared storage surpasses the limit quickly, we have to have these 3 unified
+  build-test-push:
+    name: Build, Test and Push solution
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Environment vars
+        run: |
+          echo "COMMIT_TAG=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${{needs.release.outputs.release_version}}" >> $GITHUB_ENV
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: sevensevenbit.azurecr.io
+          username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+          password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+
+      - name: Build Docker images
+        run: |
+          touch .env
+          make build
+
+      - name: Run Integration Tests
+        run: |
+          make integration-tests
+
+      - name: Tag docker image
+        run: |
+          docker tag ${{ env.OPERATOR_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker tag ${{ env.WORKER_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker tag ${{ env.TRANSACTION_STREAM_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.TRANSACTION_STREAM_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker tag ${{ env.TRANSACTION_ID_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.TRANSACTION_ID_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker tag ${{ env.TRANSACTION_SAGA_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.TRANSACTION_SAGA_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker tag ${{ env.OPERATOR_MIGRATIONS_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.OPERATOR_MIGRATIONS_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker tag ${{ env.BLOCKCHAIN_MIGRATIONS_IMAGE_NAME }}:${{needs.release.outputs.release_version}} ${{ env.REGISTRY }}/${{ env.BLOCKCHAIN_MIGRATIONS_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+
+      - name: Scan image
+        uses: Azure/container-scan@v0
+        with:
+          image-name: ${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          severity-threshold: CRITICAL
+          run-quality-checks: true
+
+      - name: Push Operator Docker image to private azure registry feed
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker push ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker push ${{ env.REGISTRY }}/${{ env.TRANSACTION_STREAM_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker push ${{ env.REGISTRY }}/${{ env.TRANSACTION_ID_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker push ${{ env.REGISTRY }}/${{ env.TRANSACTION_SAGA_SERVICE_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker push ${{ env.REGISTRY }}/${{ env.OPERATOR_MIGRATIONS_IMAGE_NAME }}:${{needs.release.outputs.release_version}}
+          docker push ${{ env.REGISTRY }}/${{ env.BLOCKCHAIN_MIGRATIONS_IMAGE_NAME }}:${{needs.release.outputs.release_version}}

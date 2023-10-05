@@ -1,0 +1,2822 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "77-Bit API",
+    "description": "An API for interacting with the 77-Bit L2 blockchain.",
+    "termsOfService": "https://77-bit.com/terms",
+    "license": {
+      "name": "License",
+      "url": "https://77-bit.com/license"
+    },
+    "version": "1.0",
+    "x-logo": {
+      "url": "https://pbs.twimg.com/profile_images/1642220143915696128/x3yCWwbE_400x400.jpg",
+      "altText": "77-Bit logo"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://testnet-api.77-bit.com",
+      "description": "Testnet server (Goerli)."
+    },
+    {
+      "url": "https://api.77-bit.com",
+      "description": "Mainnet server (Ethereum)."
+    }
+  ],
+  "paths": {
+    "/api/v1/assets": {
+      "post": {
+        "tags": [
+          "Asset"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAssetModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:assets"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "summary": "Get All Assets",
+        "description": "This endpoint fetches all assets in the system, with support for filters and pagination.",
+        "operationId": "GetAllAssets",
+        "parameters": [
+          {
+            "name": "asset_type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AssetType"
+            }
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "schema": {
+              "title": "Page Number",
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The page number to retrieve.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "title": "Page Size",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The number of items to retrieve per page.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "title": "Sort By",
+              "type": "string",
+              "description": "The field to sort the results by."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all assets in the system (paginated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetDtoPaginatedResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:assets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/{assetId}": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "summary": "Get Asset",
+        "description": "This endpoint fetches a specific asset by ID.",
+        "operationId": "GetAsset",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "description": "The asset ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an asset in the system.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:assets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/deposits/signable": {
+      "post": {
+        "tags": [
+          "Deposit"
+        ],
+        "summary": "Returns the deposit details for a given asset.",
+        "description": "This endpoint returns the deposit details for a given user, asset, and data availability mode.",
+        "operationId": "GetSignableDeposit",
+        "requestBody": {
+          "description": "The signable deposit request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignableDepositModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the deposit details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositDetailsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:vaults",
+              "write:vaults"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/marketplaces": {
+      "get": {
+        "tags": [
+          "Marketplace"
+        ],
+        "summary": "List Marketplaces",
+        "description": "This endpoint retrieves paginated a list of marketplaces.",
+        "operationId": "ListMarketplaces",
+        "responses": {
+          "200": {
+            "description": "Returns a paginated list of marketplaces.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:marketplaces"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Marketplace"
+        ],
+        "summary": "Create Marketplace",
+        "description": "This endpoint creates a marketplace.",
+        "operationId": "CreateMarketplace",
+        "requestBody": {
+          "description": "The marketplace creation request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMarketplaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created marketplace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The marketplace creation request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:marketplaces"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/marketplaces/{marketplaceId}": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Get Marketplace",
+        "description": "This endpoint retrieves a marketplace by ID.",
+        "operationId": "GetMarketplaces",
+        "parameters": [
+          {
+            "name": "marketplaceId",
+            "in": "path",
+            "description": "The marketplace id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the marketplace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Marketplace not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:marketplaces"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/mint": {
+      "post": {
+        "tags": [
+          "Mint"
+        ],
+        "summary": "Mint Assets",
+        "description": "This endpoint allows for the minting of fungible and non-fungible assets.",
+        "operationId": "MintAssets",
+        "requestBody": {
+          "description": "The assets to mint for each user.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchMintRequestModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Returns the transaction ID that was created by the mint operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionIdDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The mint request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "mint:assets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/marketplaces/{marketplaceId}/orders": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "List Marketplace Orders",
+        "description": "This endpoint retrieves paginated a list of marketplace orders.",
+        "operationId": "ListMarketplaceOrders",
+        "parameters": [
+          {
+            "name": "marketplaceId",
+            "in": "path",
+            "description": "The marketplace id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "side",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OrderSide"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "title": "Include Inactive Orders",
+              "type": "boolean",
+              "description": "Whether to include inactive orders in the results.",
+              "format": "bool"
+            }
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "schema": {
+              "title": "Page Number",
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The page number to retrieve.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "title": "Page Size",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The number of items to retrieve per page.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "title": "Sort By",
+              "type": "string",
+              "description": "The field to sort the results by."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a paginated list of marketplace orders.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:marketplaces"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Submit Order",
+        "description": "This endpoint submits a marketplace order.",
+        "operationId": "SubmitOrder",
+        "parameters": [
+          {
+            "name": "marketplaceId",
+            "in": "path",
+            "description": "The marketplace id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The order submission request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the submitted marketplace order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceOrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The order submission request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:orders"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/marketplaces/{marketplaceId}/orders/{orderId}": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Get Marketplace Order",
+        "description": "This endpoint retrieves a marketplace order by ID.",
+        "operationId": "GetMarketplaceOrder",
+        "parameters": [
+          {
+            "name": "marketplaceId",
+            "in": "path",
+            "description": "The marketplace id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "The order id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the marketplace order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:orders"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Cancel Order",
+        "description": "This endpoint cancels a marketplace order.",
+        "operationId": "CancelOrder",
+        "parameters": [
+          {
+            "name": "marketplaceId",
+            "in": "path",
+            "description": "The marketplace id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "The order id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order cancelled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid cancel request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:orders"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/marketplaces/{marketplaceId}/orders/signable": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Get Signable Order",
+        "description": "This endpoint allows for fetching signable orders.",
+        "operationId": "GetSignableOrder",
+        "parameters": [
+          {
+            "name": "marketplaceId",
+            "in": "path",
+            "description": "The marketplace id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The signable order request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignableOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the signable order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignableOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The signable order request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:orders"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/settlements": {
+      "post": {
+        "tags": [
+          "Settlement"
+        ],
+        "summary": "Submit Settlement",
+        "description": "This endpoint submits an order settlement.",
+        "operationId": "SubmitSettlement",
+        "requestBody": {
+          "description": "The settlement request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitSettlementModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the vaults updated by the settlement operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VaultDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The settlement request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:settlements"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions": {
+      "get": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Get All Transactions",
+        "description": "This endpoint fetches all transactions submitted by the system, with support for filters and pagination.",
+        "operationId": "GetAllTransactions",
+        "parameters": [
+          {
+            "name": "transaction_status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TransactionStatus"
+            }
+          },
+          {
+            "name": "transaction_status_comparison",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FilterOptions"
+            }
+          },
+          {
+            "name": "starkex_tx_id",
+            "in": "query",
+            "schema": {
+              "title": "StarkEx Transaction ID",
+              "type": "integer",
+              "description": "The unique identifier of the StarkEx transaction.",
+              "format": "integer"
+            }
+          },
+          {
+            "name": "starkex_tx_id_comparison",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FilterOptions"
+            }
+          },
+          {
+            "name": "tx_type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/StarkExOperation"
+            }
+          },
+          {
+            "name": "tx_type_comparison",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FilterOptions"
+            }
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "schema": {
+              "title": "Page Number",
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The page number to retrieve.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "title": "Page Size",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The number of items to retrieve per page.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "title": "Sort By",
+              "type": "string",
+              "description": "The field to sort the results by."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all transactions submitted by the system (paginated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDtoPaginatedResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:transactions"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions/{transactionId}": {
+      "get": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Get Transaction",
+        "description": "This endpoint fetches a specific transaction by ID.",
+        "operationId": "GetTransaction",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "in": "path",
+            "description": "The transaction ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a transaction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:transactions"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transfers": {
+      "post": {
+        "tags": [
+          "Transfer"
+        ],
+        "summary": "Transfer Asset",
+        "description": "This endpoint allows for transferring assets between users.",
+        "operationId": "Transfer",
+        "requestBody": {
+          "description": "The transfer request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the vaults updated by the transfer operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VaultDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The transfer request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:transfers"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transfers/signable": {
+      "get": {
+        "tags": [
+          "Transfer"
+        ],
+        "summary": "Get Signable Details",
+        "description": "This endpoint allows for fetching details of a transfer to be signed",
+        "operationId": "TransferSignable",
+        "parameters": [
+          {
+            "name": "from_user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Sender User ID",
+              "type": "string",
+              "description": "The unique identifier of the user sending the transfer.",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "to_user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Receiver User ID",
+              "type": "string",
+              "description": "The unique identifier of the user receiving the transfer.",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "asset_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Asset ID",
+              "type": "string",
+              "description": "The unique identifier of the asset being transferred.",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "token_id",
+            "in": "query",
+            "schema": {
+              "title": "Token ID",
+              "type": "string",
+              "description": "The hexadecimal string representation of the token ID, if applicable (ie. ERC-721/ERC-1155).",
+              "format": "hex"
+            }
+          },
+          {
+            "name": "amount.IsPowerOfTwo",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "amount.IsZero",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "amount.IsOne",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "amount.IsEven",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "amount.Sign",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the signable transfer details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferSignableDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The signable transfer request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:transfers"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Register new User",
+        "description": "This endpoint registers a user.",
+        "operationId": "RegisterUser",
+        "requestBody": {
+          "description": "The user registration request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the newly registered user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The user registration request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:users"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get All Users",
+        "description": "This endpoint fetches all users.",
+        "operationId": "GetAllUsers",
+        "parameters": [
+          {
+            "name": "creation_date",
+            "in": "query",
+            "schema": {
+              "title": "Creation Date",
+              "type": "string",
+              "description": "The creation date of the user.",
+              "format": "string"
+            }
+          },
+          {
+            "name": "creation_date_comparison",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FilterOptions"
+            }
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "schema": {
+              "title": "Page Number",
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The page number to retrieve.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "title": "Page Size",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "The number of items to retrieve per page.",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "title": "Sort By",
+              "type": "string",
+              "description": "The field to sort the results by."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDtoPaginatedResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User",
+        "description": "This endpoint fetches a specific user by ID.",
+        "operationId": "GetUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The user id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/vaults/withdraw": {
+      "post": {
+        "tags": [
+          "Withdraw"
+        ],
+        "summary": "Withdraw Asset",
+        "description": "This endpoint allows for withdrawing assets from SevenSevenBit.",
+        "operationId": "Withdraw",
+        "requestBody": {
+          "description": "The withdraw request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the details of the withdraw operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawDetailsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The withdraw request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:vaults"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssetDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "title": "Asset ID",
+            "type": "string",
+            "description": "The ID of the asset.",
+            "format": "uuid"
+          },
+          "starkExType": {
+            "title": "StarkEx Asset type",
+            "type": "string",
+            "description": "The StarkEx asset type.",
+            "format": "hex",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssetType"
+          },
+          "address": {
+            "title": "Asset Address",
+            "type": "string",
+            "description": "The ethereum address of the asset.",
+            "format": "hex",
+            "nullable": true
+          },
+          "name": {
+            "title": "Asset Name",
+            "type": "string",
+            "description": "The name of the asset.",
+            "format": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "title": "Asset Symbol",
+            "type": "string",
+            "description": "The symbol of the asset.",
+            "format": "string",
+            "nullable": true
+          },
+          "quantum": {
+            "title": "Asset Quantum",
+            "type": "string",
+            "description": "The quantum of the asset.",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetDtoPaginatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "title": "Data",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetDto"
+            },
+            "description": "The data of the response.",
+            "nullable": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetadataDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetType": {
+        "enum": [
+          "Eth",
+          "Erc20",
+          "Erc721",
+          "Erc1155",
+          "MintableErc20",
+          "MintableErc721",
+          "MintableErc1155"
+        ],
+        "type": "string"
+      },
+      "BatchMintRequestModel": {
+        "required": [
+          "mints"
+        ],
+        "type": "object",
+        "properties": {
+          "mints": {
+            "title": "Mints",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MintRequestModel"
+            },
+            "description": "The array of assets to mint.",
+            "format": "array"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request model to mint a batch of assets."
+      },
+      "CreateMarketplaceRequest": {
+        "required": [
+          "baseAssetId",
+          "quoteAssetId"
+        ],
+        "type": "object",
+        "properties": {
+          "baseAssetId": {
+            "title": "Base Asset ID",
+            "type": "string",
+            "description": "The unique identifier of the marketplace base asset.",
+            "format": "uuid"
+          },
+          "quoteAssetId": {
+            "title": "Quote Asset ID",
+            "type": "string",
+            "description": "The unique identifier of the marketplace quote asset.",
+            "format": "uuid"
+          },
+          "baseAssetTokenId": {
+            "title": "Base Asset Token ID",
+            "type": "string",
+            "description": "The token ID of the marketplace base asset (required for ERC721 and ERC1155 assets).",
+            "format": "hex",
+            "nullable": true
+          },
+          "quoteAssetTokenId": {
+            "title": "Quote Asset Token ID",
+            "type": "string",
+            "description": "The token ID of the marketplace base asset (required for ERC721 and ERC1155 assets).",
+            "format": "hex",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataAvailabilityModes": {
+        "enum": [
+          "ZkRollup",
+          "Validium"
+        ],
+        "type": "string"
+      },
+      "DepositDetailsDto": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/DepositDetailsMetadata"
+          },
+          "signable": {
+            "title": "Signable",
+            "type": "string",
+            "description": "The signable deposit transaction.",
+            "format": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DepositDetailsMetadata": {
+        "type": "object",
+        "properties": {
+          "nonce": {
+            "title": "Nonce",
+            "type": "string",
+            "description": "A sequentially incrementing counter which indicates the transaction number from the account.",
+            "format": "hex",
+            "nullable": true
+          },
+          "gasLimit": {
+            "title": "GasLimit",
+            "type": "string",
+            "description": "The maximum amount of gas units that can be consumed by the transaction.",
+            "format": "hex",
+            "nullable": true
+          },
+          "maxPriorityFeePerGas": {
+            "title": "MaxPriorityFeePerGas",
+            "type": "string",
+            "description": "The maximum price of the consumed gas to be included as a tip to the validator.",
+            "format": "hex",
+            "nullable": true
+          },
+          "maxFeePerGas": {
+            "title": "MaxFeePerGas",
+            "type": "string",
+            "description": " the maximum fee per unit of gas willing to be paid for the transaction.",
+            "format": "hex",
+            "nullable": true
+          },
+          "to": {
+            "title": "To",
+            "type": "string",
+            "description": "The receiving address (EOA or contract account).",
+            "format": "hex",
+            "nullable": true
+          },
+          "value": {
+            "title": "Value",
+            "type": "string",
+            "description": "Amount of ETH to transfer from sender to recipient.",
+            "format": "hex",
+            "nullable": true
+          },
+          "data": {
+            "title": "Data",
+            "type": "string",
+            "description": "Optional field to include arbitrary data.",
+            "format": "hex",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilterOptions": {
+        "enum": [
+          "StartsWith",
+          "EndsWith",
+          "Contains",
+          "DoesNotContain",
+          "IsEmpty",
+          "IsNotEmpty",
+          "IsGreaterThan",
+          "IsGreaterThanOrEqualTo",
+          "IsLessThan",
+          "IsLessThanOrEqualTo",
+          "IsEqualTo",
+          "IsNotEqualTo"
+        ],
+        "type": "string"
+      },
+      "MarketplaceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Marketplace ID",
+            "type": "string",
+            "description": "The ID of the marketplace.",
+            "format": "uuid"
+          },
+          "tradableAssetAId": {
+            "title": "Tradable Asset A ID",
+            "type": "string",
+            "description": "The ID of the tradable asset a.",
+            "format": "uuid"
+          },
+          "tradableAssetBId": {
+            "title": "Tradable Asset B ID",
+            "type": "string",
+            "description": "The ID of the tradable asset b.",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MarketplaceOrderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Order ID",
+            "type": "string",
+            "description": "The ID of the order.",
+            "format": "uuid"
+          },
+          "productId": {
+            "title": "Product ID",
+            "type": "string",
+            "description": "The ID of the product.",
+            "format": "uuid"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "string",
+            "description": "Quantity of the product order.",
+            "format": "int"
+          },
+          "price": {
+            "title": "Price",
+            "type": "string",
+            "description": "The price on the product order.",
+            "format": "int"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string",
+            "description": "The date of the product order.",
+            "format": "date"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MarketplaceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Marketplace ID",
+            "type": "string",
+            "description": "The unique ID of the marketplace.",
+            "format": "uuid"
+          },
+          "baseAssetId": {
+            "title": "Base Asset ID",
+            "type": "string",
+            "description": "The ID of the marketplace base asset.",
+            "format": "uuid"
+          },
+          "quoteAssetId": {
+            "title": "Quote Asset ID",
+            "type": "string",
+            "description": "The ID of the marketplace quote asset.",
+            "format": "uuid"
+          },
+          "baseAssetTokenId": {
+            "title": "Base Asset Token ID",
+            "type": "string",
+            "description": "The token ID of the marketplace base asset (for ERC721 and ERC1155 assets).",
+            "format": "hex",
+            "nullable": true
+          },
+          "quoteAssetTokenId": {
+            "title": "Quote Asset Token ID",
+            "type": "string",
+            "description": "The token ID of the marketplace base asset (for ERC721 and ERC1155 assets).",
+            "format": "hex",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetadataDto": {
+        "type": "object",
+        "properties": {
+          "hasNext": {
+            "title": "HasNext",
+            "type": "boolean",
+            "description": "Indicates whether there is a next page available."
+          },
+          "totalCount": {
+            "title": "TotalCount",
+            "type": "integer",
+            "description": "The total count of results available.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MintRequestModel": {
+        "required": [
+          "amount",
+          "assetId",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "title": "User ID",
+            "type": "string",
+            "description": "The ID of the user for which the assets should be minted.",
+            "format": "uuid"
+          },
+          "assetId": {
+            "title": "Asset ID",
+            "type": "string",
+            "description": "The ID of the of the asset being minted.",
+            "format": "uuid"
+          },
+          "tokenId": {
+            "title": "Token ID",
+            "type": "string",
+            "description": "The token id of the asset, if the asset that is being minted is an ERC721 or ERC1155.",
+            "format": "hex",
+            "nullable": true
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "string",
+            "description": "The amount of the asset to be minted.",
+            "format": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request model to mint user assets."
+      },
+      "OrderMatchResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrderResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Order ID",
+            "type": "string",
+            "description": "The unique ID of the order.",
+            "format": "uuid"
+          },
+          "marketplaceId": {
+            "title": "Marketplace ID",
+            "type": "string",
+            "description": "The ID of the marketplace.",
+            "format": "uuid"
+          },
+          "userId": {
+            "title": "User ID",
+            "type": "string",
+            "description": "The ID of the user.",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OrderType"
+          },
+          "side": {
+            "$ref": "#/components/schemas/OrderSide"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "price": {
+            "title": "Price",
+            "type": "string",
+            "description": "The order spot price.",
+            "format": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "string",
+            "description": "The original order size.",
+            "format": "string"
+          },
+          "availableSize": {
+            "title": "Available Size",
+            "type": "string",
+            "description": "The available order size (unfilled).",
+            "format": "string"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderMatchResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrderSide": {
+        "enum": [
+          "Bid",
+          "Ask"
+        ],
+        "type": "string"
+      },
+      "OrderStatus": {
+        "enum": [
+          "Unfilled",
+          "Placed",
+          "Cancelled",
+          "PartiallyFilled",
+          "Filled",
+          "Expired"
+        ],
+        "type": "string"
+      },
+      "OrderType": {
+        "enum": [
+          "Limit",
+          "Market"
+        ],
+        "type": "string"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "RegisterAssetModel": {
+        "required": [
+          "name",
+          "quantum",
+          "symbol",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/AssetType"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "symbol": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantum": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterUserModel": {
+        "required": [
+          "starkKey",
+          "starkSignature"
+        ],
+        "type": "object",
+        "properties": {
+          "starkKey": {
+            "title": "STARK Key",
+            "minLength": 1,
+            "type": "string",
+            "description": "The STARK key of the user.",
+            "format": "hex"
+          },
+          "starkSignature": {
+            "$ref": "#/components/schemas/SignatureModel"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SettlementInfoModel": {
+        "type": "object",
+        "properties": {
+          "orderAFeeDestinationVaultId": {
+            "title": "Order A Fee Destination Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the destination vault for the order A fee.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderAFeeAmount": {
+            "title": "Order A Fee Amount",
+            "type": "string",
+            "description": "The order A fee amount.",
+            "format": "string",
+            "nullable": true
+          },
+          "orderBFeeDestinationVaultId": {
+            "title": "Order B Fee Destination Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the destination vault for the order B fee.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderBFeeAmount": {
+            "title": "Order B Fee Amount",
+            "type": "string",
+            "description": "The order B fee amount.",
+            "format": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Settlement details model."
+      },
+      "SettlementOrderModel": {
+        "required": [
+          "buyQuantizedAmount",
+          "buyVaultId",
+          "expirationTimestamp",
+          "nonce",
+          "sellQuantizedAmount",
+          "sellVaultId",
+          "signature"
+        ],
+        "type": "object",
+        "properties": {
+          "buyVaultId": {
+            "title": "Buy Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the buy vault.",
+            "format": "uuid"
+          },
+          "buyQuantizedAmount": {
+            "title": "Buy Quantized Amount",
+            "type": "string",
+            "description": "The amount of the asset to be settled, in quantized form."
+          },
+          "sellVaultId": {
+            "title": "Sell Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the sell vault.",
+            "format": "uuid"
+          },
+          "sellQuantizedAmount": {
+            "title": "Sell Quantized Amount",
+            "type": "string",
+            "description": "The amount of the asset to be settled, in quantized form."
+          },
+          "feeVaultId": {
+            "title": "Fee Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the transfer sender vault.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "feeQuantizedAmount": {
+            "title": "Fee Quantized Amount",
+            "type": "string",
+            "description": "The amount of the fee asset to be collected, in quantized form.",
+            "nullable": true
+          },
+          "nonce": {
+            "title": "Nonce",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "The unique nonce for the transfer.",
+            "format": "int32"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/SignatureModel"
+          },
+          "expirationTimestamp": {
+            "title": "Expiration Timestamp",
+            "type": "integer",
+            "description": "The timestamp at which this transfer becomes invalid, in seconds since the Unix epoch.",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignableDepositModel": {
+        "required": [
+          "amount",
+          "assetId",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "title": "User ID",
+            "type": "string",
+            "description": "The ID of the user for which the vault should be allocated.",
+            "format": "uuid"
+          },
+          "assetId": {
+            "title": "Asset ID",
+            "type": "string",
+            "description": "The ID of the vault's asset.",
+            "format": "uuid"
+          },
+          "tokenId": {
+            "title": "Token ID",
+            "type": "string",
+            "description": "The hexadecimal string representation of the vault's asset token ID, if applicable (ie. ERC-721/ERC-1155).",
+            "format": "hex",
+            "nullable": true
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "string",
+            "description": "The amount of the asset to be deposited.",
+            "format": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignableOrderMetadata": {
+        "type": "object",
+        "properties": {
+          "baseAssetAmountQuantized": {
+            "title": "Base Asset Amount Quantized",
+            "type": "string",
+            "description": "The quantized amount of the base asset.",
+            "format": "string"
+          },
+          "quoteAssetAmountQuantized": {
+            "title": "Quote Asset Amount Quantized",
+            "type": "string",
+            "description": "The quantized amount of the quote asset.",
+            "format": "string"
+          },
+          "nonce": {
+            "title": "Nonce",
+            "type": "integer",
+            "description": "The unique nonce for the order.",
+            "format": "int32"
+          },
+          "expirationTimestamp": {
+            "title": "Expiration Timestamp",
+            "type": "integer",
+            "description": "The timestamp at which this transfer becomes invalid, in seconds since the Unix epoch.",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignableOrderRequest": {
+        "required": [
+          "baseAssetAmount",
+          "quoteAssetAmount",
+          "side",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "side": {
+            "$ref": "#/components/schemas/OrderSide"
+          },
+          "baseAssetAmount": {
+            "type": "string"
+          },
+          "quoteAssetAmount": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignableOrderResponse": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/SignableOrderMetadata"
+          },
+          "signable": {
+            "title": "Signable Payload",
+            "type": "string",
+            "description": "The signable payload for the order.",
+            "format": "hex",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignatureModel": {
+        "required": [
+          "r",
+          "s"
+        ],
+        "type": "object",
+        "properties": {
+          "r": {
+            "title": "Signature R",
+            "minLength": 1,
+            "type": "string",
+            "description": "The R component of the ECDSA signature, represented as a hexadecimal string.",
+            "format": "hex"
+          },
+          "s": {
+            "title": "Signature S",
+            "minLength": 1,
+            "type": "string",
+            "description": "The S component of the ECDSA signature, represented as a hexadecimal string.",
+            "format": "hex"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Model representing an ECDSA signature data."
+      },
+      "StarkExOperation": {
+        "enum": [
+          "Deposit",
+          "Withdrawal",
+          "Mint",
+          "MultiTransaction",
+          "Transfer",
+          "FullWithdrawal",
+          "FalseFullWithdrawal",
+          "Settlement"
+        ],
+        "type": "string"
+      },
+      "SubmitOrderRequest": {
+        "required": [
+          "baseAssetAmountQuantized",
+          "expirationTimestamp",
+          "nonce",
+          "quoteAssetAmountQuantized",
+          "side",
+          "signature",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "side": {
+            "$ref": "#/components/schemas/OrderSide"
+          },
+          "baseAssetAmountQuantized": {
+            "type": "string"
+          },
+          "quoteAssetAmountQuantized": {
+            "type": "string"
+          },
+          "nonce": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "expirationTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/SignatureModel"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubmitSettlementModel": {
+        "required": [
+          "orderA",
+          "orderB"
+        ],
+        "type": "object",
+        "properties": {
+          "orderA": {
+            "$ref": "#/components/schemas/SettlementOrderModel"
+          },
+          "orderB": {
+            "$ref": "#/components/schemas/SettlementOrderModel"
+          },
+          "settlementInfo": {
+            "$ref": "#/components/schemas/SettlementInfoModel"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request model to transfer assets between users."
+      },
+      "TransactionDto": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "title": "Transaction ID",
+            "type": "string",
+            "description": "The ID of the transaction.",
+            "format": "uuid"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/StarkExOperation"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "starkExTransaction": {
+            "$ref": "#/components/schemas/TransactionModel"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionDtoPaginatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "title": "Data",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionDto"
+            },
+            "description": "The data of the response.",
+            "nullable": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetadataDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionIdDto": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "title": "Transaction ID",
+            "type": "string",
+            "description": "The unique identifier of the transaction.",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionModel": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionStatus": {
+        "enum": [
+          "Created",
+          "Streamed",
+          "Pending",
+          "Confirmed",
+          "Reverted",
+          "Failed"
+        ],
+        "type": "string"
+      },
+      "TransferModel": {
+        "required": [
+          "amount",
+          "assetId",
+          "expirationTimestamp",
+          "fromUserId",
+          "nonce",
+          "signature",
+          "toUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "fromUserId": {
+            "title": "Sender Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the transfer sender vault.",
+            "format": "uuid"
+          },
+          "toUserId": {
+            "title": "Receiver Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the transfer recipient vault.",
+            "format": "uuid"
+          },
+          "assetId": {
+            "title": "Asset ID",
+            "type": "string",
+            "description": "The unique identifier of the asset being transferred.",
+            "format": "uuid"
+          },
+          "tokenId": {
+            "title": "Token ID",
+            "type": "string",
+            "description": "The hexadecimal string representation of the token ID, if applicable (ie. ERC-721/ERC-1155).",
+            "format": "hex",
+            "nullable": true
+          },
+          "expirationTimestamp": {
+            "title": "Expiration Timestamp",
+            "type": "integer",
+            "description": "The timestamp at which this transfer becomes invalid, in seconds since the Unix epoch.",
+            "format": "int64"
+          },
+          "nonce": {
+            "title": "Nonce",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "The unique nonce for the transfer.",
+            "format": "int32"
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "string",
+            "description": "The amount of the asset to be transferred."
+          },
+          "signature": {
+            "$ref": "#/components/schemas/SignatureModel"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request model to transfer assets between users."
+      },
+      "TransferSignableDto": {
+        "type": "object",
+        "properties": {
+          "signable": {
+            "title": "Signable Payload",
+            "type": "string",
+            "description": "The signable payload for the transfer.",
+            "format": "hex",
+            "nullable": true
+          },
+          "expirationTimestamp": {
+            "title": "Expiration Timestamp",
+            "type": "integer",
+            "description": "The timestamp at which this transfer becomes invalid, in seconds since the Unix epoch.",
+            "format": "int64"
+          },
+          "nonce": {
+            "title": "Nonce",
+            "type": "integer",
+            "description": "The unique nonce for the transfer.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "title": "User ID",
+            "type": "string",
+            "description": "The ID of the user.",
+            "format": "uuid"
+          },
+          "starkKey": {
+            "title": "STARK Key",
+            "type": "string",
+            "description": "The STARK key of the user.",
+            "format": "hex",
+            "nullable": true
+          },
+          "balance": {
+            "title": "Balance",
+            "type": "string",
+            "description": "The $RAG balance of the user.",
+            "format": "hex"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDtoPaginatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "title": "Data",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            },
+            "description": "The data of the response.",
+            "nullable": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetadataDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VaultDto": {
+        "type": "object",
+        "properties": {
+          "vaultId": {
+            "title": "Vault ID",
+            "type": "string",
+            "description": "The ID of the vault.",
+            "format": "uuid"
+          },
+          "vaultChainId": {
+            "title": "Vault Chain ID",
+            "type": "string",
+            "description": "The StarkEx ID of the vault."
+          },
+          "assetSymbol": {
+            "title": "Asset Symbol",
+            "type": "string",
+            "description": "The symbol of the asset associated with the vault.",
+            "format": "string",
+            "nullable": true
+          },
+          "tokenId": {
+            "title": "Token ID",
+            "type": "string",
+            "description": "The token id of the asset associated with the vault, if the asset is an ERC721 or ERC1155.",
+            "format": "hex",
+            "nullable": true
+          },
+          "mintingBlob": {
+            "title": "Minting Blob",
+            "type": "string",
+            "description": "The minting blob of the asset associated with the vault, if the asset is a Mintable ERC20, ERC721 or ERC1155.",
+            "format": "hex",
+            "nullable": true
+          },
+          "assetStarkExId": {
+            "title": "Asset StarkEx ID",
+            "type": "string",
+            "description": "The StarkEx ID of the asset associated with the vault.",
+            "format": "hex",
+            "nullable": true
+          },
+          "userStarkKey": {
+            "title": "STARK Key",
+            "type": "string",
+            "description": "The STARK key of the user associated with the vault.",
+            "format": "hex",
+            "nullable": true
+          },
+          "availableBalance": {
+            "title": "Available Balance",
+            "type": "string",
+            "description": "The available balance of the vault."
+          },
+          "accountingBalance": {
+            "title": "Accounting Balance",
+            "type": "string",
+            "description": "The accounting balance of the vault."
+          },
+          "dataAvailabilityMode": {
+            "$ref": "#/components/schemas/DataAvailabilityModes"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WithdrawDetailsDto": {
+        "type": "object",
+        "properties": {
+          "vault": {
+            "$ref": "#/components/schemas/VaultDto"
+          },
+          "withdrawFunction": {
+            "title": "Smart Contract Address",
+            "type": "string",
+            "description": "The withdraw function to use on-chain.",
+            "format": "string",
+            "nullable": true
+          },
+          "starkKey": {
+            "title": "User's STARK Key",
+            "type": "string",
+            "description": "The user's public STARK key",
+            "format": "hex",
+            "nullable": true
+          },
+          "assetType": {
+            "title": "Asset type",
+            "type": "string",
+            "description": "The asset type identifier.",
+            "format": "hex",
+            "nullable": true
+          },
+          "tokenId": {
+            "title": "Token Id",
+            "type": "string",
+            "description": "The token Id for ERC-721 and ERC-1155 assets.",
+            "format": "hex",
+            "nullable": true
+          },
+          "mintingBlob": {
+            "title": "Minting blob",
+            "type": "string",
+            "description": "The minting blob for Mintable ERC-20, ERC-721 and ERC-1155 assets.",
+            "format": "hex",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "WithdrawModel": {
+        "required": [
+          "amount",
+          "vaultId"
+        ],
+        "type": "object",
+        "properties": {
+          "vaultId": {
+            "title": "Vault ID",
+            "type": "string",
+            "description": "The unique identifier of the vault to withdraw from.",
+            "format": "uuid"
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "string",
+            "description": "The amount of the asset to be withdrawn, in unquantized form."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://sevensevenbit-dev.eu.auth0.com/oauth/token",
+            "scopes": {
+              "write:users": "Access user write operations.",
+              "read:users": "Access user read operations.",
+              "write:assets": "Access asset write operations.",
+              "read:assets": "Access asset read operations.",
+              "mint:assets": "Access mint operations.",
+              "read:vaults": "Access vault read operations.",
+              "write:transfers": "Access transfer write operations.",
+              "write:settlements": "Access settlement write operations.",
+              "read:transactions": "Access tarnsaction read operations."
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "User",
+      "description": "Manage user-related operations."
+    },
+    {
+      "name": "Asset",
+      "description": "Manage asset-related operations."
+    },
+    {
+      "name": "Mint",
+      "description": "Manage minting-related operations."
+    },
+    {
+      "name": "Transfer",
+      "description": "Manage asset transfer operations."
+    },
+    {
+      "name": "Transaction",
+      "description": "Manage transaction-related operations."
+    },
+    {
+      "name": "Withdraw",
+      "description": "Manage asset withdrawal operations."
+    },
+    {
+      "name": "Fee",
+      "description": "Manage fee configuration operations."
+    },
+    {
+      "name": "Order",
+      "description": "Manage order-related operations."
+    },
+    {
+      "name": "Settlement",
+      "description": "Manage asset settlement operations."
+    },
+    {
+      "name": "Marketplace",
+      "description": "Manage marketplace-related operations."
+    },
+    {
+      "name": "Deposit",
+      "description": "Manage asset deposit operations."
+    }
+  ]
+}

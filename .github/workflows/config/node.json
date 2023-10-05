@@ -1,0 +1,5 @@
+{
+    "additionalProperties": {
+        "npmName": "SevenSevenBit.SDK.Client"
+    }
+}

@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+      <CodeAnalysisRuleSet>$(SolutionDir)sevensevenbit.operator.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <CodeAnalysisRuleSet>$(SolutionDir)sevensevenbit.operator.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="Nethereum.ABI" />
+      <PackageReference Include="NewRelic.Agent" />
+      <PackageReference Include="NewRelic.Agent.Api" />
+      <PackageReference Include="Nethereum.Hex" />
+      <PackageReference Include="BouncyCastle.NetCore" />
+      <PackageReference Include="StarkEx.Crypto.SDK" />
+      <PackageReference Include="StyleCop.Analyzers">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Telemetry\" />
+  </ItemGroup>
+
+</Project>

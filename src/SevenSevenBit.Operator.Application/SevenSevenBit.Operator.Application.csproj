@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.1.3" />
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PackageId>SevenSevenBit.Operator.Application</PackageId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+      <CodeAnalysisRuleSet>$(SolutionDir)sevensevenbit.operator.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <CodeAnalysisRuleSet>$(SolutionDir)sevensevenbit.operator.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  
+    <ItemGroup>
+      <PackageReference Include="LanguageExt.Core" />
+      <PackageReference Include="MediatR" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+<!--      // TODO Move NEthereum deps to Blockchain proj -->
+      <PackageReference Include="Nethereum.Signer.EIP712" />
+      <PackageReference Include="Nethereum.Web3" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
+      <PackageReference Include="StyleCop.Analyzers">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\SevenSevenBit.Operator.Domain\SevenSevenBit.Operator.Domain.csproj" />
+    <ProjectReference Include="..\SevenSevenBit.Operator.SharedKernel\SevenSevenBit.Operator.SharedKernel.csproj" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Compile Remove="DTOs\Entities\RawTransaction\StarkExTransactionDto.cs" />
+    <Compile Remove="DTOs\Entities\RawTransaction\StarkExMintTransactionDto.cs" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Folder Include="DTOs\Entities\RawTransaction\" />
+  </ItemGroup>
+
+</Project>

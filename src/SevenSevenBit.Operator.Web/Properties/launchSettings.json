@@ -1,0 +1,54 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "https://localhost:57678/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "SevenSevenBit.Operator.Web.Development": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:57679/",
+      "launchUrl": "https://localhost:57679/api-docs/index.html"
+    },
+    "SevenSevenBit.Operator.Web.Mocks": {
+        "commandName": "Project",
+        "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Mocks"
+        },
+        "applicationUrl": "https://localhost:57679/"
+    },
+    "SevenSevenBit.Operator.Web.e2e": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "e2e"
+      },
+      "applicationUrl": "https://localhost:57679/"
+    },
+    "SevenSevenBit.Operator.Web.MocksWithProxy": {
+        "commandName": "Project",
+        "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Mocks",
+            "ALL_PROXY": "http://localhost:8888/"
+        },
+        "applicationUrl": "https://localhost:57679/"
+    },  
+    "SevenSevenBit.Operator.Web": {
+      "commandName": "Project",
+      "applicationUrl": "https://localhost:57679/"
+    }
+  }
+}

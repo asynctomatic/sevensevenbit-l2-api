@@ -1,0 +1,25 @@
+﻿{
+  "profiles": {
+    "SevenSevenBit.Operator.Worker": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "SevenSevenBit.Operator.Worker.Mocks": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "environmentVariables": {
+            "DOTNET_ENVIRONMENT": "Mocks"
+        }
+    },
+    "SevenSevenBit.Operator.Worker.e2e": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "e2e"
+      }
+    }
+  }
+}

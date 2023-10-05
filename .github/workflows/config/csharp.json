@@ -1,0 +1,8 @@
+{
+    "additionalProperties": {
+        "library": "httpclient",
+        "packageName": "SevenSevenBit.SDK.Client",
+        "targetFramework": "netstandard2.0",
+        "nullableReferenceTypes": false
+    }
+}

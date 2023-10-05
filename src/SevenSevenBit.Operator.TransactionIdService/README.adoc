@@ -1,0 +1,65 @@
+= TransactionId Service
+Copyright (c) 2022 Three Sigma. All rights reserved
+
+
+This canvas describes the `TransactionId Service`, which is part of the https://threesigma.xyz[SevenSevenBit] project.
+
+[cols="8*"]
+|===
+3+a| Name: 5+a| TransactionId Service
+
+3+a| *Description:*
+5+a|
+
+The TransactionId Service provides an API for managing (i.e., allocating and freeing) StarkEx transaction Ids.
+
+8+a| *Capabilities*
+8+a|
+StarkEx Transaction Id Management
+8+| *Service API*
+3+| Commands 3+| Queries 2+| Events Published
+3+a| Synchronous:
+
+* N/A
+
+Asynchronous:
+
+* Allocate Transaction Id
+* Free Transaction Id
+
+ 3+a| N/A 2+a|
+
+* Transaction Id Allocated
+* Transaction Id Freed
+
+3+| Non-functional requirements 5+a|
+
+* 99.95% availability
+* 10,000 allocations/second
+
+8+| *Observability*
+8+| Key metrics
+8+a|
+
+* allocated_transaction_ids
+* freed_transaction_ids
+
+4+| Health check endpoint
+4+| /healthz
+
+
+
+8+| *Implementation*
+8+| Domain Model
+8+a| * N/A
+8+| *Dependencies*
+4+| Invokes 4+| Subscribes to
+4+a|
+
+N/A
+
+ 4+a| Saga reply channels:
+
+* Stream Transaction Saga
+
+|===

@@ -1,0 +1,167 @@
+version: "3.8"  
+
+services:
+  api:
+    container_name: sevensevenbit-api
+    image: sevensevenbit-api:dev
+    build:
+      context: .
+      dockerfile: src/SevenSevenBit.Operator.Web/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - docker
+    depends_on:
+      - db
+      - message-bus
+      - starkex
+  
+  worker:
+    container_name: sevensevenbit-worker
+    image: sevensevenbit-worker:dev
+    build:
+      context: .
+      dockerfile: src/SevenSevenBit.Operator.Worker/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    networks:
+      - docker
+    depends_on:
+      - db-operator-migrations
+      - db-blockchain-migrations
+      - message-bus
+      - blockchain-migrations
+  
+  db:
+    container_name: sevensevenbit-db
+    hostname: sevensevenbit-db
+    image: postgres:14.6
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=somepassword
+      - POSTGRES_DB=postgres
+    networks:
+      - docker
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      start_period: 10s
+      interval: 5s
+      timeout: 1s
+      retries: 5
+
+  db-operator-migrations:
+    container_name: sevensevenbit-db-operator-migrations
+    build:
+      context: .
+      dockerfile: .docker/migrations/Dockerfile
+      target: operator-migrations
+    environment:
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=somepassword
+      - PGDATABASE=postgres
+    networks:
+      - docker
+    depends_on:
+      - db
+  
+  db-blockchain-migrations:
+    container_name: sevensevenbit-db-blockchain-migrations
+    build:
+      context: .
+      dockerfile: .docker/migrations/Dockerfile
+      target: blockchain-migrations
+    environment:
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=somepassword
+      - PGDATABASE=postgres
+    networks:
+      - docker
+    depends_on:
+      - db
+  
+  db-admin:
+    container_name: sevensevenbit-db-admin
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@pgadmin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    networks:
+      - docker
+    depends_on:
+      - db
+
+  message-bus:
+    container_name: sevensevenbit-message-bus
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    networks:
+      - docker
+
+  blockchain:
+    container_name: sevensevenbit-blockchain
+    image: threesigmalabs.azurecr.io/threesigmaxyz/threesigma-starkex-contracts:latest
+    ports:
+      - "8545:8545"
+    networks:
+      - docker
+    healthcheck:
+      test: [ "CMD", "cast", "chain-id" ]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  blockchain-migrations:
+    container_name: sevensevenbit-blockchain-migrations
+    build:
+      context: .docker/blockchain/migrations
+      dockerfile: Dockerfile
+    environment:
+      - STARKEX_SEQUENCE_NUMBER=1
+      - STARKEX_VALIDIUM_VAULT_ROOT=2080691150869914534766879727318932669398085814729621863115884828556130066692
+      - STARKEX_VALIDIUM_TREE_HEIGHT=31
+      - STARKEX_ROLLUP_VAULT_ROOT=207095555137602068174310225607660532858489993604082708018689543482077973596
+      - STARKEX_ROLLUP_TREE_HEIGHT=31
+      - STARKEX_ORDER_ROOT=782789488582197453756570607249782803464646337934052302582063579083846343149
+      - STARKEX_ORDER_TREE_HEIGHT=255
+      - STARKEX_STRICT_VAULT_BALANCE_POLICY=false
+      - STARKEX_TOKEN_ADMIN=0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+      - STARKEX_DA_THRESHOLD=0
+      - SCALABLE_DEX_ADDRESS=0x5fbdb2315678afecb367f032d93f642f64180aa3
+      - FAUCET_ADDRESS=0x5C3cB0E1fe0b525f9A3db41286Bab06A39977639
+    depends_on:
+      - blockchain
+    networks:
+      - docker
+      
+  
+  starkex:
+    container_name: sevensevenbit-starkex
+    image: sevensevenbit-starkex
+    build:
+      context: .docker/starkex
+      dockerfile: Dockerfile
+    #ports:
+    #  - "8080:8080"
+    volumes:
+      - .docker/starkex/mappings:/home/wiremock/mappings
+    networks:
+      - docker
+
+networks:
+  docker:

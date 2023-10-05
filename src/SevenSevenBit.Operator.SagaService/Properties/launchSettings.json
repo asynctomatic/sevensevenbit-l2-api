@@ -1,0 +1,27 @@
+﻿{
+    "profiles": {
+        "SevenSevenBit.Operator.SagaService": {
+            "commandName": "Project", 
+            "dotnetRunMessages": true, 
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        }, 
+        "SevenSevenBit.Operator.SagaService.Mocks": {
+            "commandName": "Project", 
+            "dotnetRunMessages": true, 
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Mocks",
+                "ASPNETCORE_ENVIRONMENT": "Mocks"
+            }
+        },
+        "SevenSevenBit.Operator.SagaService.e2e": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "e2e",
+                "ASPNETCORE_ENVIRONMENT": "e2e"
+            }
+        }
+    }
+}

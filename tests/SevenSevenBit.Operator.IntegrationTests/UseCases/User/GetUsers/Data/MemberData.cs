@@ -1,0 +1,1 @@
+namespace SevenSevenBit.Operator.IntegrationTests.UseCases.User.GetUsers.Data;

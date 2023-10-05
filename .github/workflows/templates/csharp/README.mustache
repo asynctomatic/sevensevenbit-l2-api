@@ -1,0 +1,240 @@
+# {{packageName}} [![Github Actions][gha-badge]][gha] [![Docs][dotnet-badge]][dotnet] [![License: MIT][license-badge]][license]
+[gha]: https://github.com/threesigmaxyz/sevensevenbit-dotnet-client/actions
+[gha-badge]: https://github.com/threesigmaxyz/sevensevenbit-dotnet-client/actions/workflows/main.yml/badge.svg
+[dotnet]: https://github.com/dotnet/core
+[dotnet-badge]: https://img.shields.io/static/v1?label=Built%20with&message=.NET&color=blueviolet
+[license]: https://opensource.org/licenses/MIT
+[license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+
+{{#appDescriptionWithNewLines}}
+{{{.}}}
+{{/appDescriptionWithNewLines}}
+
+- API version: {{appVersion}}
+- SDK version: {{packageVersion}}
+{{^hideGenerationTimestamp}}
+- Build date: {{generatedDate}}
+{{/hideGenerationTimestamp}}
+{{#infoUrl}}
+    For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+<a name="frameworks-supported"></a>
+## Frameworks supported
+{{#netStandard}}
+- .NET Core >=1.0
+- .NET Framework >=4.6
+- Mono/Xamarin >=vNext
+{{/netStandard}}
+
+<a name="installation"></a>
+## Installation
+You can install the publicly available nuget packages via the following command.
+We recommend using [NuGet](https://docs.nuget.org/consume/installing-nuget) to obtain the latest version of the packages.
+```bash
+dotnet add package SevenSevenBit.SDK.Client
+```
+
+Then add the packages to your project, use the namespaces:
+```csharp
+using {{packageName}}.{{apiPackage}};
+using {{packageName}}.Client;
+using {{packageName}}.{{modelPackage}};
+```
+
+<a name="usage"></a>
+## Usage
+
+To use the API client with a HTTP proxy, setup a `System.Net.WebProxy`
+```csharp
+Configuration c = new Configuration();
+System.Net.WebProxy webProxy = new System.Net.WebProxy("http://myProxyUrl:80/");
+webProxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
+c.Proxy = webProxy;
+```
+{{#useHttpClient}}
+
+### Connections
+Each ApiClass (properly the ApiClient inside it) will create an instance of HttpClient. It will use that for the entire lifecycle and dispose it when called the Dispose method.
+
+To better manager the connections it's a common practice to reuse the HttpClient and HttpClientHandler (see [here](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net) for details). To use your own HttpClient instance just pass it to the ApiClass constructor.
+
+```csharp
+HttpClientHandler yourHandler = new HttpClientHandler();
+HttpClient yourHttpClient = new HttpClient(yourHandler);
+var api = new YourApiClass(yourHttpClient, yourHandler);
+```
+
+If you want to use an HttpClient and don't have access to the handler, for example in a DI context in Asp.net Core when using IHttpClientFactory.
+
+```csharp
+HttpClient yourHttpClient = new HttpClient();
+var api = new YourApiClass(yourHttpClient);
+```
+You'll loose some configuration settings, the features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings. You need to either manually handle those in your setup of the HttpClient or they won't be available.
+
+Here an example of DI setup in a sample web project:
+
+```csharp
+services.AddHttpClient<YourApiClass>(httpClient =>
+   new YourApiClass(httpClient));
+```
+
+{{/useHttpClient}}
+
+<a name="getting-started"></a>
+## Getting Started
+
+```csharp
+using System.Collections.Generic;
+using System.Diagnostics;
+{{#useHttpClient}}
+using System.Net.Http;
+{{/useHttpClient}}
+using {{packageName}}.{{apiPackage}};
+using {{packageName}}.Client;
+using {{packageName}}.{{modelPackage}};
+
+namespace Example
+{
+    public class {{operationId}}Example
+    {
+        public static void Main()
+        {
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+            Configuration config = new Configuration();
+            config.BasePath = "https://api.77bitPlaceholder.io";
+            {{#hasAuthMethods}}
+            {{#authMethods}}
+            {{#isBasicBasic}}
+            // Configure HTTP basic authorization: {{{name}}}
+            config.Username = "YOUR_USERNAME";
+            config.Password = "YOUR_PASSWORD";
+            {{/isBasicBasic}}
+            {{#isBasicBearer}}
+            // Configure Bearer token for authorization: {{{name}}}
+            config.AccessToken = "YOUR_BEARER_TOKEN";
+            {{/isBasicBearer}}
+            {{#isApiKey}}
+            // Configure API key authorization: {{{name}}}
+            config.ApiKey.Add("{{{keyParamName}}}", "YOUR_API_KEY");
+            {{/isApiKey}}
+            {{#isOAuth}}
+            // Configure OAuth2 access token for authorization: {{{name}}}
+            config.OAuthTokenUrl = "{{{tokenUrl}}}";
+            config.OAuthClientId = "YOUR_CLIENT_ID";
+            config.OAuthClientSecret = "YOUR_CLIENT_SECRET";
+            {{/isOAuth}}
+            {{/authMethods}}
+
+            {{/hasAuthMethods}}
+            {{#useHttpClient}}
+            // create instances of HttpClient, HttpClientHandler to be reused later with different Api classes
+            HttpClient httpClient = new HttpClient();
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            var apiInstance = new {{classname}}(httpClient, config, httpClientHandler);
+            {{/useHttpClient}}
+            {{^useHttpClient}}
+            var apiInstance = new {{classname}}(config);
+            {{/useHttpClient}}
+            {{#allParams}}
+            {{#isPrimitiveType}}
+            var {{paramName}} = {{{example}}};  // {{{dataType}}} | {{{description}}}{{^required}} (optional) {{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+            var {{paramName}} = new {{{dataType}}}(); // {{{dataType}}} | {{{description}}}{{^required}} (optional) {{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+            {{/isPrimitiveType}}
+            {{/allParams}}
+
+            try
+            {
+                {{#summary}}
+                // {{{.}}}
+                {{/summary}}
+                {{#returnType}}{{{.}}} result = {{/returnType}}apiInstance.{{{operationId}}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});{{#returnType}}
+                Debug.WriteLine(result);{{/returnType}}
+            }
+            catch (ApiException e)
+            {
+                Debug.Print("Exception when calling {{classname}}.{{operationId}}: " + e.Message );
+                Debug.Print("Status Code: "+ e.ErrorCode);
+                Debug.Print(e.StackTrace);
+            }
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+        }
+    }
+}
+```
+
+<a name="documentation-for-api-endpoints"></a>
+## Documentation for API Endpoints
+| Base URL | Description |
+|------------|-------------|
+{{#servers}}
+| {{url}} | {{description}} |
+{{/servers}}
+
+All URIs are relative to base url:
+
+Class | Method | HTTP request | Description
+------------ | ------------- | ------------- | -------------
+{{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{{summary}}}
+{{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+
+<a name="documentation-for-models"></a>
+## Documentation for Models
+
+{{#modelPackage}}
+{{#models}}{{#model}} - [{{{modelPackage}}}.{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+{{/modelPackage}}
+{{^modelPackage}}
+No model defined in this package
+{{/modelPackage}}
+
+<a name="documentation-for-authorization"></a>
+## Documentation for Authorization
+
+{{^authMethods}}
+All endpoints do not require authorization.
+{{/authMethods}}
+{{#authMethods}}
+{{#last}}
+Authentication schemes defined for the API:
+{{/last}}
+{{/authMethods}}
+{{#authMethods}}
+<a name="{{name}}"></a>
+### {{name}}
+
+{{#isApiKey}}- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+{{/isApiKey}}
+{{#isBasicBasic}}- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}- **Type**: Bearer Authentication
+{{/isBasicBearer}}
+{{#isOAuth}}- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Token URL**: {{tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+
+{{/authMethods}}
+
+---
+<a name="documentation-for-about-us"></a>
+## About Us
+[Three Sigma](https://threesigma.xyz/) is a venture builder firm focused on blockchain engineering, research, and investment. Our mission is to advance the adoption of blockchain technology and contribute towards the healthy development of the Web3 space.
+If you are interested in joining our team, please contact us [here](mailto:info@threesigma.xyz).
+
+---
+
+<p align="center">
+    <a href="https://threesigma.xyz" target="_blank">
+        <img src="https://threesigma.xyz/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fthree-sigma-labs-research-capital-white.0f8e8f50.png&w=2048&q=75" width="75%" />
+    </a>
+</p>

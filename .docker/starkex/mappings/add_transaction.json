@@ -1,0 +1,13 @@
+{
+  "request": {
+    "url": "/v2/gateway/add_transaction",
+    "method": "POST"
+  },
+  "response": {
+    "status": 200,
+    "body": "{ \"code\": \"TRANSACTION_PENDING\" }",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

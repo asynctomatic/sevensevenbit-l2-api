@@ -1,0 +1,82 @@
+name: Update Client SDKs
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout.'
+        required: true
+      
+jobs:
+  generate-sdks:
+    name: Generate and publish client SDKs
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        generator: [ csharp ]
+        include:
+          - generator: csharp
+            config: .github/workflows/config/csharp.json
+            template: .github/workflows/templates/csharp
+            repo: threesigmaxyz/sevensevenbit-dotnet-client
+            remove: "src docs"
+    #          - generator: python
+    #            config: .github/workflows/config/python.json
+    #            template: .github/workflows/templates/python
+    #            repo: threesigmaxyz/sevensevenbit-python-client
+    #            remove: "src docs"
+          - generator: typescript-node
+            config: .github/workflows/config/node.json
+            template: .github/workflows/templates/node
+            repo: threesigmaxyz/sevensevenbit-node-client
+            remove: "src docs"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.ref }}
+
+      - name: Generate client SDK
+        uses: openapi-generators/openapitools-generator-action@v1
+        with:
+          generator-tag: latest-release
+          generator: ${{ matrix.generator }}
+          openapi-file: openapi/swagger.json
+          config-file: ${{ matrix.config }}
+          template-dir: ${{ matrix.template }}
+
+      - name: Checkout client repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ secrets.GH_TOKEN_FOR_CLIENT_SDK_UPDATE }}
+          path: ${{ matrix.repo }}
+
+      - name: Copy contents to client repo
+        run: |
+          cd ${{ matrix.repo }}
+          rm -Rf ${{ matrix.remove }}
+          cd -
+          cp -r ${{ matrix.generator }}-client/* ${{ matrix.repo }}
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.2.3
+        with:
+          path: ${{ matrix.repo }}
+          token: ${{ secrets.GH_TOKEN_FOR_CLIENT_SDK_UPDATE }}
+          branch: openapi-${{ matrix.generator }}
+          delete-branch: true
+          author: github-actions <41898282+github-actions[bot]@users.noreply.github.com>
+          title: 'Update client SDK'
+          labels: |
+            enhancement
+            automated pr
+
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

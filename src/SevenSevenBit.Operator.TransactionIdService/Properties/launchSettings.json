@@ -1,0 +1,27 @@
+﻿{
+    "profiles": {
+        "SevenSevenBit.Operator.TransactionIdService": {
+            "commandName": "Project", 
+            "dotnetRunMessages": true, 
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        }, 
+        "SevenSevenBit.Operator.TransactionIdService.Mocks": {
+            "commandName": "Project", 
+            "dotnetRunMessages": true, 
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Mocks",
+                "DOTNET_ENVIRONMENT": "Mocks"
+            }
+        },
+        "SevenSevenBit.Operator.TransactionIdService.e2e": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "e2e",
+                "DOTNET_ENVIRONMENT": "e2e"
+            }
+        }
+    }
+}

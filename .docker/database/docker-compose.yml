@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: sevensevenbit-db
+    hostname: sevensevenbit-db
+    image: postgres:14.6
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=somepassword
+      - POSTGRES_DB=postgres
+    networks:
+      - docker
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      start_period: 10s
+      interval: 5s
+      timeout: 1s
+      retries: 5
+      
+  db-operator-migrations:
+    container_name: sevensevenbit-db-operator-migrations
+    build:
+      context: ..
+      dockerfile: .docker/database/migrations/Dockerfile
+      target: operator-migrations
+    environment:
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=somepassword
+      - PGDATABASE=postgres
+    networks:
+      - docker
+    depends_on:
+      - db
+  
+  db-blockchain-migrations:
+    container_name: sevensevenbit-db-blockchain-migrations
+    build:
+      context: ..
+      dockerfile: .docker/database/migrations/Dockerfile
+      target: blockchain-migrations
+    environment:
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=somepassword
+      - PGDATABASE=postgres
+    networks:
+      - docker
+    depends_on:
+      - db
+
+networks:
+  docker:
+
+volumes:
+  db-data:
